@@ -68,27 +68,28 @@ User can prefix most commands with a number:
 n N         Next / previous match
 :noh        Stop hiliting the last search
 %           Go to matching brace, one of: ({[ or )}]
+:g/pat/     Print all lines that contain pattern pat (see pattern examples in RE section below)
 ```
 
 
 ## Replace
+Using substitute command "s".
 ```
 :s/a/b      Replace first a with b on current line
 :s/a/b/g    Replace all a on current line
 :%s/a/b/g   Replace all a in file
-:4,7s/a/b   On line 4 thru 7, replace only the first a
+:4,7s/a/b   On lines 4 thru 7, replace only the first a
 ```
 
 
 ## Ranges
 Ranges can be used with Replace and other commands.
 ```
-:n,m         Lines n–m (as seen is last replace example above)
+:n,m         Lines n–m (see last replace example above)
 :.           Current line
 :$           Last line
 :'c          Marker c
-:%           All lines in file
-:g/pattern/  All lines that contain RE pattern (see below for RE examples + the built in help guide quick ref page)
+:%           All lines in file(see replace example 3 above)
 ```
 
 
@@ -113,6 +114,8 @@ J           Join lines (move line below to end of current line)
 :wq  ZZ     Write (save) and quit
 :q   :q!    Quit / quit without saving
 ```
+If you do :q and have any unsaved changes, this command will notify you and not quit.  
+<br>
 
 
 ## Command-Line
@@ -125,9 +128,9 @@ This is not an exhaustive list of all commands.
 :noh            Stop hiliting the last search
 :w file         Write to file
 :r file         Read file content and insert after current line
-:n   :p         Next / previous file
-:e file         Edit file
-:e! file        Edit file, discard changes
+:n  :p          Next / previous file
+:e file         Edit file, if you have any unsaved changes this command will stop and notify you
+:e! file        Edit file, first discard any changes in current file
 :!cmd           Run shell command
 !!cmd           Replace current line with output of cmd, ex: !!ls -al
 :set nu         Show line numbers
@@ -138,7 +141,7 @@ This is not an exhaustive list of all commands.
 
 ## Windows / Tabs
 ```
-vi f1 f2 f3     Open 3 files f1, f2, f3 (typed at the Linux command line)
+vi f1 f2 f3     Open 3 files f1, f2, f3 (type this vi command at the Linux command prompt)
 Ctrl-w s        Split window (also Ctrl-ws)
 Ctrl-w w        Switch window (also Ctrl-ww)
 Ctrl-w <arrow>  Move to window in arrow direction
@@ -160,11 +163,13 @@ m{a-zA-Z}       Mark current position with single letter mark in range {a-zA-Z}
 
 ## Macros
 ```
-qa              Record macro a
+qa              Record macro a, can be any lower case letter
 q               Stop recording
 @a              Play macro a
+qA              Add to macro a
 ```
-
+Note that macro "a" will be replaced if you type qa a second time.  
+<br>
 
 ## Regular Expressions (RE)
 Used for pattern matching, ex: find line that starts with BEGIN and ends with END.  
@@ -188,7 +193,8 @@ ATOM below means a unit of repetition, ex:  [0-9]  (ab)  .  a
 ```
 
 
-## RE - Example Sets (aka Character classes)
+## RE - Character Class
+Each set below defines a character class.
 ```
 [A-Z]       Match a single capital letter, in range A thru Z
 [f-p]       Match a single lower case letter, in range f thru p
@@ -201,21 +207,21 @@ ATOM below means a unit of repetition, ex:  [0-9]  (ab)  .  a
 ```
 
 
-## RE - Groups (aka Capture Groups)
+## RE - Groups
 
 A group is a way to treat multiple characters as a single atom.  
-Groups capture the text they match so it can be referenced later - using a back reference.  
+A group captures the text it matches so it can be referenced later - using a back reference.  
 A pattern can have multiple groups.
 ```
 \v          Very magic mode, eliminates need to use \ escape for ( | ) + ? {}
             Using \v is like using egrep instead of grep
-\v(subpat)  Match subpat, a sub-pattern wrapped in () and save it as a capture group
+\v(pat)     Match pat, a sub-pattern wrapped in () and capture it for later reference
             Can contain chars and char classes, ex: ([a-f][0-9]suv) - example covered below
             Can contain | called alternation, ex: (40|44) - match 40 or 44, example below
 \v(p1)(p2)  Match p1p2 and capture the matched contents of subpatterns p1 and p2 for use as backref \1 and \2
             Both p1 and p2 are ATOMs and thus can both be units of repetition, see (foo)(bar)+ example below
 \1          Backref to matched contents of group 1
-\2          Backref to matched contents of group 2 - see 4 repeating words example below
+\2          Backref to matched contents of group 2 - see repeating words example below
             Max of 9 group backrefs: \1 \2 \3 ... \9
 ```
 
@@ -249,6 +255,12 @@ A pattern can have multiple groups.
 Sometimes it's just eaiser to use grep.  This will print all lines with no "
 ```
 grep -v '"' file
+```
+
+## RE - Substitute Example
+```
+:%s/^TEST/FRED/    Replace all cases of TEST occurring at start of line with FRED (in the current file)
+:1,7s/^TEST/FRED/  Replace same as above but only for cases that occur on lines 1 thru 7
 ```
 
 <br>
