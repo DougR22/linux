@@ -170,7 +170,7 @@ q               Stop recording
 Used for pattern matching, ex: find line that starts with BEGIN and ends with END.  
 This is not an exhaustive list of all RE expressions, see VIM help.  
 CHAR below means character, any single letter, number, symbol.  
-ATOM below means a unit of repitition, ex:  [0-9]  (ab)  .  a
+ATOM below means a unit of repetition, ex:  [0-9]  (ab)  .  a
 ```
 .           Match any single char except newline
 *           Match zero or more occurrences of prior atom, ex:  .*  a*  (ab)*  [a-z]*
@@ -205,15 +205,17 @@ ATOM below means a unit of repitition, ex:  [0-9]  (ab)  .  a
 
 A group is a way to treat multiple characters as a single atom.  
 Groups capture the text they match so it can be referenced later - using a back reference.  
-You can have one or more groups.
+A pattern can have multiple groups.
 ```
 \v          Very magic mode, eliminates need to use \ escape for ( | ) + ? {}
-            Using \v is like using egrep instead of grep.
-\v(subpat)  Capture Group, subpat is a sub-pattern wrapped in ()
+            Using \v is like using egrep instead of grep
+\v(subpat)  Match subpat, a sub-pattern wrapped in () and save it as a capture group
             Can contain chars and char classes, ex: ([a-f][0-9]suv) - example covered below
-            Can contain | which they call alternation, ex: (40|44) - match 40 or 44
-\1          Backref to contents of group 1
-\2          Backref to contents of group 2 - see example below using \1 and \2
+            Can contain | called alternation, ex: (40|44) - match 40 or 44, example below
+\v(p1)(p2)  Match p1p2 and capture the matched contents of subpatterns p1 and p2 for use as backref \1 and \2
+            Both p1 and p2 are ATOMs and thus can both be units of repetition, see (foo)(bar)+ example below
+\1          Backref to matched contents of group 1
+\2          Backref to matched contents of group 2 - see 4 repeating words example below
             Max of 9 group backrefs: \1 \2 \3 ... \9
 ```
 
@@ -232,10 +234,14 @@ You can have one or more groups.
 /[D-U][c-k]     Match 2 letters, first capital D thru U, second lower case c thru k
 /\v([a-f][0-9]suv)    Match 1 letter (a thru f) followed by 1 digit followed by the 3 letters suv, ex: b5suv
 /\v(40|44)            Match 40 OR 44, using group syntax with very magic mode \v
+/foobar               Match 6 letters foobar exactly
+/\v(foo)(bar)*        Match foobar where bar may exist 0 or multiple times
+/\v(foo)(bar)+        Match foobar where bar exists at least once and may repeat multiple times
 /\v(\w+)-(\w+)-\1-\2  Match repeating 4 word sequence, matches both: foo-bar-foo-bar + aaa-bbb-aaa-bbb
 /[0-9]          Match a single digit
 /^[^#]          Match first char on a line where that char is NOT #
-/fo.*nd         Match text that starts with fo and ends with nd, ex: foreground, fond, fo7nd
+/fo.*nd         Match text that starts with fo and ends with nd, ex: foreground, fond, fo7nd, fo2x3ynd
+/\vfo.+nd       Match text as above, but there must be at least 1 char between fo and nd, fond does not match
 /".*"           Match double quoted text
 /\v^([^"])*$    Match line with no quoted text - use very magic mode \v
 /\v^(.*")@!     Match same as above but using negative lookahead @!
