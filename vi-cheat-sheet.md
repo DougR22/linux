@@ -6,13 +6,19 @@ vi, also called VIM, has 3 modes:
 - **Insert**: enter this mode by typing a `i` or `a` or `o`.  Press `ESC` → return to command mode
 - **Command-Line**:  press `:` or `/` or `?` while in command mode, allows user to enter commands that run after pressing **Enter**
 
+## Invoke
+At the Linux command line type:
+```
+vi filename
+```
+where you type vi you can also type vim.
 
 ## Movement
 ```
 Scrolling   Mouse/trackpad can be used to scroll the text but not to place cursor for edit
 h j k l     Left down up right (hold over from 1970s, just use arrow keys, Pgup, PgDn)
 b w e       Word back / forward / end
-0 $         Start / end of line
+0   $       Start / end of line
 gg  G       First / last line
 #gg #G :#   Go to line given by #, where # is a number
 H M L       Go to top / middle / bottom of screen
@@ -33,7 +39,6 @@ r R         Replace char at cursor with next char typed / continuously overtype 
 ## Copy / Paste
 ```
 yy          Yank (copy) the current line
-#yy         Yank # lines, ex: 4yy copies 4 lines
 p P         Paste after / before current line
 ```
 
@@ -50,7 +55,7 @@ D           Delete to end of line
 ## Prefix Count
 User can prefix most commands with a number:
 ```
-5dw         delete 5 words
+5dd         delete 5 lines
 4yy         copy 4 lines
 3p          paste buffer content 3 times
 ```
@@ -78,7 +83,7 @@ n N         Next / previous match
 ## Ranges
 Ranges can be used with Replace and other commands.
 ```
-:n,m         Lines n–m
+:n,m         Lines n–m (as seen is last replace example above)
 :.           Current line
 :$           Last line
 :'c          Marker c
@@ -105,17 +110,18 @@ J           Join lines (move line below to end of current line)
 
 ## Quit
 ```
-:wq  ZZ     Save (write) and quit
+:wq  ZZ     Write (save) and quit
 :q   :q!    Quit / quit without saving
 ```
 
 
 ## Command-Line
 Enter commands for file operations and global actions.  Note that `/` and `?` are also command-line operations.  
-Press `ESC` → return to command mode  
+Press `ESC` → return to command mode.  
+This is not an exhaustive list of all commands.
 ```
 :f   Ctrl-G     Show status line, filename, line#, col#, % of how far you are into the file
-:44  0    $     Go to line 44 / first line / last line of file
+:44  0  $       Go to line 44 / first line / last line of file
 :noh            Stop hiliting the last search
 :w file         Write to file
 :r file         Read file content and insert after current line
@@ -132,7 +138,7 @@ Press `ESC` → return to command mode
 
 ## Windows / Tabs
 ```
-vi f1 f2 f3     Open multiple files
+vi f1 f2 f3     Open 3 files f1, f2, f3 (typed at the Linux command line)
 Ctrl-w s        Split window (also Ctrl-ws)
 Ctrl-w w        Switch window (also Ctrl-ww)
 Ctrl-w <arrow>  Move to window in arrow direction
@@ -161,21 +167,22 @@ q               Stop recording
 
 
 ## Regular Expressions (RE)
+Used for pattern matching, ex: find line that starts with BEGIN and ends with END.  
 This is not an exhaustive list of all RE expressions, see VIM help.  
 CHAR below means character, any single letter, number, symbol.  
 ATOM below means a unit of repitition, ex:  [0-9]  (ab)  .  a
 ```
-.           Any single char except newline
-*           Zero or more occurrences of prior atom, ex:  .*  a*  (ab)*  [a-z]*
-+           One or more occurrences of prior atom, but you have to use \+ unless using \v mode (see below)
-[b-h]       Any single character in the range b thru h, they call it a character class
-\d \w \s    digit -- word -- space (incl TAB so it's whitespace)
-\D \S       Not digit -- Not space
+.           Match any single char except newline
+*           Match zero or more occurrences of prior atom, ex:  .*  a*  (ab)*  [a-z]*
++           Match one or more occurrences of prior atom, but you have to use \+ unless using \v mode (see below)
+[b-h]       Match any single character in the range b thru h, they call it a character class
+\d \w \s    Match a digit -- word -- space (incl TAB so it's whitespace)
+\D \S       Match Not digit -- Not space
 ^  $        Anchor – beginning of the line -- end of line
             Note that ^ inside [] means not
-[^ ]        Not space
-\n          Newline
-\%u         Multibyte character, eg \%u20ac -- the Euro sign €
+[^ ]        Match not space
+\n          Match newline
+\%u         Match multibyte character, eg \%u20ac -- the Euro sign €
 \@=   \@!   Positive and negative lookahead -- see last example in search examples below
 \@<=  \@<!  Positive and negative lookbehind -- no examples below 
 ```
@@ -200,27 +207,26 @@ A group is a way to treat multiple characters as a single atom.
 Groups capture the text they match so it can be referenced later - using a back reference.  
 You can have one or more groups.
 ```
-\v          Very magic mode, it is very handy when using group syntax.  It eliminates need to use escape \ all over the place.
-            After a \v all ASCII characters except 0-9, a-z, A-Z and _ have special meaning, like ( | ) + ? {}
+\v          Very magic mode, eliminates need to use \ escape for ( | ) + ? {}
             Using \v is like using egrep instead of grep.
 \v(subpat)  Capture Group, subpat is a sub-pattern wrapped in ()
             Can contain chars and char classes, ex: ([a-f][0-9]suv) - example covered below
             Can contain | which they call alternation, ex: (40|44) - match 40 or 44
 \1          Backref to contents of group 1
 \2          Backref to contents of group 2 - see example below using \1 and \2
-            Max of 9 groups: \1 \2 \3 ... \9
+            Max of 9 group backrefs: \1 \2 \3 ... \9
 ```
 
 
 ## RE - Search Examples
 ```
 /Hello          Match Hello - note that regular expressions are case sensitive
-/^a             Match letter a but only ones at at start of line
-/.x             Match any char followed by x
-/.x*            Match all text from x to the right
+/^a             Match letter a but only if at start of line
+/.b             Match any single char followed by b
+/c.*            Match all chars from c to end of line
 /34$            Match 34 only if at end of line
-/^TEST          Match TEST but only at start of a line
-/^TEST$         Match TEST but only if it is the only 4 chars on a line
+/^TEST          Match TEST only at start of a line
+/^TEST$         Match TEST only if those are the only 4 chars on the line
 /^[a-zA-Z]      Match first letter on a line (lower or upper case)
 /^[a-z].*       Match all chars on a line that start with lower case a–z
 /[D-U][c-k]     Match 2 letters, first capital D thru U, second lower case c thru k
@@ -228,11 +234,11 @@ You can have one or more groups.
 /\v(40|44)            Match 40 OR 44, using group syntax with very magic mode \v
 /\v(\w+)-(\w+)-\1-\2  Match repeating 4 word sequence, matches both: foo-bar-foo-bar + aaa-bbb-aaa-bbb
 /[0-9]          Match a single digit
-/^[^#]          Match first character on a line where that char is NOT #
-/fo.*nd         Match text that starts with fo and ends with nd, ex: foreground, fond
+/^[^#]          Match first char on a line where that char is NOT #
+/fo.*nd         Match text that starts with fo and ends with nd, ex: foreground, fond, fo7nd
 /".*"           Match double quoted text
 /\v^([^"])*$    Match line with no quoted text - use very magic mode \v
-/\v^(.*")@!     Result same as above but using negative lookahead @!
+/\v^(.*")@!     Match same as above but using negative lookahead @!
 ```
 Sometimes it's just eaiser to use grep.  This will print all lines with no "
 ```
